@@ -29,7 +29,7 @@ public class RecipeEventProducer {
 
     @Transactional
     public void sendPendingRecipes(){
-//        List<RecipeResponse> resipeResponseList = recipeMapper.toDto(recipeRepository.findByStatusPending());
+        List<RecipeResponse> resipeResponseList = recipeMapper.toDtos(recipeRepository.findByStatusPending());
     }
 
 
