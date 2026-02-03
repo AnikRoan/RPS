@@ -1,5 +1,6 @@
 package com.rpsB.demo.entity;
 
+import com.rpsB.demo.enums.Category;
 import com.rpsB.demo.enums.SendStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -67,6 +68,9 @@ public class Recipe {
 
     @Enumerated(EnumType.STRING)
     private SendStatus status = SendStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     @CreationTimestamp
     @Column(updatable = false)
