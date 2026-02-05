@@ -2,16 +2,20 @@ version = 1
 
 [[analyzers]]
 name = "java"
+enabled = true
 path = "backRPS"
 
 [[analyzers]]
 name = "python"
+enabled = true
 path = "serverAlpyRPS"
 
 [[analyzers]]
 name = "python"
+enabled = true
 path = "MCPServer"
 
 [[analyzers]]
-name = "typescript"
+name = "javascript"
+enabled = true
 path = "frontRPS"
