@@ -1,0 +1,17 @@
+version = 1
+
+[[analyzers]]
+name = "java"
+path = "backRPS"
+
+[[analyzers]]
+name = "python"
+path = "serverAlpyRPS"
+
+[[analyzers]]
+name = "python"
+path = "MCPServer"
+
+[[analyzers]]
+name = "typescript"
+path = "frontRPS"
