@@ -6,6 +6,9 @@ import com.rpsB.demo.entity.Recipe;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+import java.util.UUID;
+
 @Mapper(
         componentModel = "spring",
         uses = {IngredientMapper.class, VoteMapper.class}
@@ -27,4 +30,7 @@ public interface RecipeMapper {
     @Mapping(target = "updated_at",ignore = true)
     @Mapping(source = "ingredientDtoList", target = "ingredientList")
     Recipe toEntity(RecipeRequest request);
+
+    List<RecipeResponse> toDtos(List<Recipe> recipes);
+
 }
