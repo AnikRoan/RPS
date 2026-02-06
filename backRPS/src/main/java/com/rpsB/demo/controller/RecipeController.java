@@ -4,8 +4,6 @@ package com.rpsB.demo.controller;
 import com.rpsB.demo.dto.RecipeRequest;
 import com.rpsB.demo.dto.RecipeResponse;
 import com.rpsB.demo.dto.RecipeUpdateDto;
-import com.rpsB.demo.entity.User;
-import com.rpsB.demo.repository.UserRepository;
 import com.rpsB.demo.service.RecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,36 +26,33 @@ import java.util.UUID;
 public class RecipeController {
 
     private final RecipeService recipeService;
-    private final UserRepository userRepository;
-    User user = userRepository.findById(1L).orElseThrow();
 
     @PostMapping()
     public ResponseEntity<RecipeResponse> createRecipe(@RequestBody RecipeRequest recipeRequest) {
 
-        return ResponseEntity.ok().body(recipeService.createRecipe(recipeRequest, user));
+        return ResponseEntity.ok().body(recipeService.createRecipe(recipeRequest));
     }
 
     @PutMapping()
     public ResponseEntity<RecipeResponse> updateRecipe(RecipeUpdateDto updateDto, UUID recipeId) {
-        return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId, user));
+        return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId));
     }
 
     @GetMapping("/id")
     public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable("id") UUID id) {
-        return ResponseEntity.ok().body(recipeService.getRecipeById(id, user));
+        return ResponseEntity.ok().body(recipeService.getRecipeById(id));
     }
 
     @GetMapping("/my")
     public ResponseEntity<Page<RecipeResponse>> getUserRecipes(@RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok().body(recipeService.getRecipes(user, page, size));
+        return ResponseEntity.ok().body(recipeService.getMyRecipes(page, size));
     }
 
     @DeleteMapping("/id")
     public ResponseEntity<?> deleteRecipe(@PathVariable("id") UUID id) {
-        recipeService.deliteRecipeById(id, user);
+        recipeService.deliteRecipeById(id);
         return ResponseEntity.ok().body(id);
     }
-
 
 }
