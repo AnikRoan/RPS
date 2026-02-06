@@ -2,20 +2,24 @@ version = 1
 
 [[analyzers]]
 name = "java"
-enabled = true
-path = "backRPS"
+
+  [analyzers.meta]
+  runtime_version = "21"
 
 [[analyzers]]
 name = "python"
-enabled = true
-path = "serverAlpyRPS"
+
+  [analyzers.meta]
+  runtime_version = "3.x.x"
 
 [[analyzers]]
 name = "python"
-enabled = true
-path = "MCPServer"
+
+  [analyzers.meta]
+  runtime_version = "3.x.x"
 
 [[analyzers]]
 name = "javascript"
-enabled = true
-path = "frontRPS"
+
+  [analyzers.meta]
+  plugins = ["angular"]
