@@ -71,6 +71,10 @@ public class User {
         this.name = name;
     }
 
+    public void changeEmail(String email) {
+        this.email = email;
+    }
+
     public void changeAvatar(String avatar) {
         this.avatar = avatar;
     }
