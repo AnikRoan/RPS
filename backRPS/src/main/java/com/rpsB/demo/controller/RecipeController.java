@@ -38,7 +38,7 @@ public class RecipeController {
         return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId));
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok().body(recipeService.getRecipeById(id));
     }
@@ -49,7 +49,7 @@ public class RecipeController {
         return ResponseEntity.ok().body(recipeService.getMyRecipes(page, size));
     }
 
-    @DeleteMapping("/id")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecipe(@PathVariable("id") UUID id) {
         recipeService.deliteRecipeById(id);
         return ResponseEntity.ok().body(id);

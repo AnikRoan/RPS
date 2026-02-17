@@ -38,5 +38,5 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             """)
     int updateStaus(@Param("uuid") UUID uuid,
                     @Param("status") SendStatus status);
-}
 
+}

@@ -36,6 +36,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+//@DynamicUpdate optimize queri
 public class Recipe {
     @Id
     @GeneratedValue
@@ -55,13 +56,6 @@ public class Recipe {
     private int timeToCookMinutes;
     private int averageVote;
 
-    @OneToMany(
-            mappedBy = "recipe",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<Vote> voteList = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
@@ -79,4 +73,3 @@ public class Recipe {
     private LocalDateTime updated_at;
 
 }
-

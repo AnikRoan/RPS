@@ -13,7 +13,6 @@ public record RecipeResponse(
         List<IngredientDto> ingredientDtoList,
         int timeToCookMinutes,
         int averageVote,
-        List<VoteDto> voteDtos,
         Category category,
         Long userId,
         LocalDateTime created_at

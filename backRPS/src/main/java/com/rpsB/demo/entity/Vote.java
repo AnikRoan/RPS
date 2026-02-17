@@ -18,7 +18,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "votes",
-        uniqueConstraints = @UniqueConstraint(name = "uk_vote_rcipe_user", columnNames = {"recipe_id", "user_id"}))
+        uniqueConstraints = @UniqueConstraint(name = "uk_vote_rcipe_user",
+                                              columnNames = {"recipe_id", "user_id"}))
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

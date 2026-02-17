@@ -7,6 +7,10 @@ public record IngredientDto(
         Double amount,
         String unit,
         String note,
-        Integer position
+        Integer position,
+        Double calories,
+        Double proteins,
+        Double fats,
+        Double carbs
 ) {
 }
