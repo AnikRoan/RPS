@@ -56,13 +56,14 @@ public class UserService {
                 .ifPresent(user::changeEmail);
         Optional.ofNullable(updateDto.avatar())
                 .ifPresent(user::changeAvatar);
-        Optional.ofNullable(passwordEncoder.encode(updateDto.password()))
+        Optional.ofNullable(updateDto.password())
+                .map(passwordEncoder::encode)
                 .ifPresent(user::changePassword);
 
-        return userMapper.toDto(save(user));
+        return userMapper.toDto(user);
     }
 
-    @Transactional
+
     public String deleteMe() {
         UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
         User user = userRepository.findById(principal.getId()).orElseThrow(() ->

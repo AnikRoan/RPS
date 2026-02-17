@@ -1,9 +1,9 @@
 package com.rpsB.demo.dto;
 
-public record VoteDto(
+public record VoteResponse(
         Long id,
         Integer value,
-        String userEmail,
-        String note
+        String note,
+        String userName
 ) {
 }

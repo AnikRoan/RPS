@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="ingredients")
+@Table(name = "ingredients")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -30,7 +30,7 @@ public class Ingredient {
             fetch = FetchType.LAZY,
             optional = false
     )
-    @JoinColumn(name="recipe_id")
+    @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     @Column(nullable = false)
@@ -39,4 +39,11 @@ public class Ingredient {
     private String unit;
     private String note;
     private Integer position;
+
+    //TODO: create A2A in frontend
+    private Double calories;
+    private Double proteins;
+    private Double fats;
+    private Double carbs;
+    private String source;
 }
