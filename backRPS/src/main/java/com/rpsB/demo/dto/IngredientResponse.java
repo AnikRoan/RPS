@@ -1,6 +1,6 @@
 package com.rpsB.demo.dto;
 
-public record IngredientDto(
+public record IngredientResponse(
         Long id,
         Long recipe_id,
         String name,

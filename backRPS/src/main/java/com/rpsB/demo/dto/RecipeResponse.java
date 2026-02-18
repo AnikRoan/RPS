@@ -10,7 +10,7 @@ public record RecipeResponse(
         UUID uuid,
         String name,
         String description,
-        List<IngredientDto> ingredientDtoList,
+        List<IngredientResponse> ingredientResponseList,
         int timeToCookMinutes,
         int averageVote,
         Category category,

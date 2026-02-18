@@ -31,7 +31,7 @@ public class VoteService {
     private final AuthService authService;
     private final EntityManager entityManager;
 
-    //TODO: realize this
+
     @Transactional
     public VoteResponse createVote(VoteRequest request, UUID recipeId) {
 
@@ -83,13 +83,20 @@ public class VoteService {
 
     }
 
-    public String deleteVote(Long voteId) {
+    @Transactional
+    public String deleteVote(UUID recipeId, Long voteId) {
         UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
-        Vote vote = voteRepository.findById(voteId).orElseThrow();
-        if (Objects.equals(vote.getUserVote().getId(), principal.getId())) {
-            voteRepository.deleteById(voteId);
-            return "Vote was deleted";
+
+        Vote vote = voteRepository
+                .findByIdAndRecipeId(recipeId, voteId)
+                .orElseThrow(() -> new RuntimeException("Vote not found"));
+
+        if (!Objects.equals(vote.getUserVote().getId(), principal.getId())) {
+            throw new RuntimeException("Access denied");
         }
-        return "Vote was not deleted";
+
+        voteRepository.delete(vote);
+
+        return "Vote was deleted";
     }
 }

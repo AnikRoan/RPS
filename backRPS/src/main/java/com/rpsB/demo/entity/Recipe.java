@@ -72,4 +72,9 @@ public class Recipe {
     @UpdateTimestamp
     private LocalDateTime updated_at;
 
+    public void addIngredient(Ingredient ingredient) {
+        ingredientList.add(ingredient);
+        ingredient.setRecipe(this);
+    }
+
 }

@@ -104,5 +104,4 @@ public class User {
         return List.copyOf(recipes);
     }
 
-
 }

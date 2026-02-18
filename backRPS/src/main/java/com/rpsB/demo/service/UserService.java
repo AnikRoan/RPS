@@ -64,6 +64,7 @@ public class UserService {
     }
 
 
+    @Transactional
     public String deleteMe() {
         UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
         User user = userRepository.findById(principal.getId()).orElseThrow(() ->

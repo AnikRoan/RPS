@@ -11,20 +11,18 @@ import java.util.UUID;
 
 @Mapper(
         componentModel = "spring",
-        uses = {IngredientMapper.class, VoteMapper.class}
+        uses = {IngredientMapper.class}
 )
 public interface RecipeMapper {
 
     //Entity -> Response dto
-    @Mapping(source = "ingredientList", target = "ingredientDtoList")
-    @Mapping(source = "voteList", target = "voteDtos")
+    @Mapping(source = "ingredientList", target = "ingredientResponseList")
     @Mapping( source = "creator.id", target = "userId")
     RecipeResponse toDto(Recipe recipe);
 
     //Request dto -> Entity
     @Mapping(target = "uuid", ignore = true)
     @Mapping(target = "averageVote",ignore = true)
-    @Mapping(target = "voteList", ignore = true)
     @Mapping(target = "creator", ignore = true)
     @Mapping(target = "created_at",ignore = true)
     @Mapping(target = "updated_at",ignore = true)
@@ -32,5 +30,4 @@ public interface RecipeMapper {
     Recipe toEntity(RecipeRequest request);
 
     List<RecipeResponse> toDtos(List<Recipe> recipes);
-
 }
