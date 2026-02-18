@@ -10,8 +10,5 @@ import org.mapstruct.Mapping;
 )
 public interface UserMapper {
 
-    @Mapping(target = "recipes", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     UserDto toDto(User user);
 }

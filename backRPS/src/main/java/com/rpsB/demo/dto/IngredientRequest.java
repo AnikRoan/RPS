@@ -5,6 +5,9 @@ public record IngredientRequest(
         Double amount,
         String unit,
         String note,
-        Integer position
+        Double calories,
+        Double proteins,
+        Double fats,
+        Double carbs
 ) {
 }

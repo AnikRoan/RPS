@@ -1,6 +1,8 @@
 package com.rpsB.demo.controller;
 
 
+import com.rpsB.demo.dto.IngredientRequest;
+import com.rpsB.demo.dto.IngredientResponse;
 import com.rpsB.demo.dto.RecipeRequest;
 import com.rpsB.demo.dto.RecipeResponse;
 import com.rpsB.demo.dto.RecipeUpdateDto;
@@ -33,13 +35,14 @@ public class RecipeController {
         return ResponseEntity.ok().body(recipeService.createRecipe(recipeRequest));
     }
 
-    @PutMapping()
-    public ResponseEntity<RecipeResponse> updateRecipe(RecipeUpdateDto updateDto, UUID recipeId) {
+    @PutMapping("/{recipeId}")
+    public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable UUID recipeId,
+                                                       @RequestBody RecipeUpdateDto updateDto) {
         return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable("id") UUID id) {
+    public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable UUID id) {
         return ResponseEntity.ok().body(recipeService.getRecipeById(id));
     }
 
@@ -50,9 +53,28 @@ public class RecipeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable("id") UUID id) {
+    public ResponseEntity<?> deleteRecipe(@PathVariable UUID id) {
         recipeService.deliteRecipeById(id);
         return ResponseEntity.ok().body(id);
     }
 
+    //    Actions with ingredient
+    @PutMapping("/{recipeId}/ingredient/{ingredientId}")
+    public ResponseEntity<IngredientResponse> updateIngredient(@PathVariable UUID recipeId,
+                                                               @PathVariable Long ingredientId,
+                                                               @RequestBody IngredientRequest ingredientRequest) {
+        return ResponseEntity.ok().body(recipeService.updateIngredient(recipeId, ingredientId, ingredientRequest));
+    }
+
+    @DeleteMapping("/{recipeId}/ingredient/{ingredientId}")
+    public void deleteIngredient(@PathVariable UUID recipeId,
+                                 @PathVariable Long ingredientId) {
+        recipeService.deleteIngredient(recipeId, ingredientId);
+    }
+
+    @PostMapping("/{recipeId}")
+    public ResponseEntity<IngredientResponse> addIngredient(@PathVariable UUID recipeId,
+                                                           @RequestBody IngredientRequest ingredientRequest) {
+        return ResponseEntity.ok().body(recipeService.addIngredient(recipeId, ingredientRequest));
+    }
 }
