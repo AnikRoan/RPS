@@ -11,7 +11,6 @@ import com.rpsB.demo.entity.User;
 import com.rpsB.demo.mapper.IngredientMapper;
 import com.rpsB.demo.mapper.RecipeMapper;
 import com.rpsB.demo.repository.RecipeRepository;
-import com.rpsB.demo.security.UserPrincipal;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -34,15 +33,13 @@ public class RecipeService {
     private final RecipeMapper recipeMapper;
     private final IngredientMapper ingredientMapper;
     private final RecipeRepository recipeRepository;
-    private final AuthService authService;
     private final EntityManager entityManager;
 
     @Transactional
-    public RecipeResponse createRecipe(RecipeRequest recipeRequest) {
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
+    public RecipeResponse createRecipe(RecipeRequest recipeRequest, Long userId) {
 
         Recipe recipe = recipeMapper.toEntity(recipeRequest);
-        recipe.setCreator(entityManager.getReference(User.class, principal.getId()));
+        recipe.setCreator(entityManager.getReference(User.class, userId));
 
         recipe.getIngredientList()
                 .forEach(i -> i.setRecipe(recipe));
@@ -52,12 +49,11 @@ public class RecipeService {
     }
 
     @Transactional
-    public RecipeResponse updateRecipe(RecipeUpdateDto updateRecipe, UUID recipeId) {
-        UserPrincipal user = authService.getAuthenticatedUserPrincipal();
+    public RecipeResponse updateRecipe(RecipeUpdateDto updateRecipe, UUID recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
                 () -> new EntityNotFoundException("Recipe not found"));
 
-        if (!recipe.getCreator().getId().equals(user.getId())) {
+        if (!recipe.getCreator().getId().equals(userId)) {
             throw new AccessDeniedException("You are not the owner");
         }
 
@@ -78,21 +74,19 @@ public class RecipeService {
         return recipeMapper.toDto(recipe);
     }
 
-    public Page<RecipeResponse> getMyRecipes(int page, int size) {
-        UserPrincipal user = authService.getAuthenticatedUserPrincipal();
+    public Page<RecipeResponse> getMyRecipes(int page, int size, Long userId) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return recipeRepository.findAllUserRecipe(user.getId(), pageable)
+        return recipeRepository.findAllUserRecipe(userId, pageable)
                 .map(recipeMapper::toDto);
     }
 
     @Transactional
-    public void deliteRecipeById(UUID recipeId) {
-        UserPrincipal user = authService.getAuthenticatedUserPrincipal();
+    public void deliteRecipeById(UUID recipeId,Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
                 () -> new EntityNotFoundException("Recipe not found")
         );
-        if (Objects.equals(recipe.getCreator().getId(), user.getId())) {
+        if (Objects.equals(recipe.getCreator().getId(), userId)) {
             recipeRepository.deleteById(recipeId);
         }
     }
@@ -100,11 +94,10 @@ public class RecipeService {
     //    Actions with ingredient
 
     @Transactional
-    public IngredientResponse updateIngredient(UUID recipeId, Long ingredientId, IngredientRequest ingredientRequest) {
-        UserPrincipal user = authService.getAuthenticatedUserPrincipal();
+    public IngredientResponse updateIngredient(UUID recipeId, Long ingredientId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
                 new EntityNotFoundException("recipe not found"));
-        if (!Objects.equals(user.getId(), recipe.getCreator().getId())) {
+        if (!Objects.equals(userId, recipe.getCreator().getId())) {
             throw new UsernameNotFoundException("this recipe is not your");
         }
         Ingredient ingredient = recipe.getIngredientList()
@@ -126,11 +119,10 @@ public class RecipeService {
         return ingredientMapper.toDto(ingredient);
     }
 
-    public void deleteIngredient(UUID recipeId, Long ingredientId) {
-        UserPrincipal user = authService.getAuthenticatedUserPrincipal();
+    public void deleteIngredient(UUID recipeId, Long ingredientId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
                 new EntityNotFoundException("recipe not found"));
-        if (!Objects.equals(user.getId(), recipe.getCreator().getId())) {
+        if (!Objects.equals(userId, recipe.getCreator().getId())) {
             throw new UsernameNotFoundException("this recipe is not your");
         }
         Ingredient ingredient = recipe.getIngredientList()
@@ -144,11 +136,10 @@ public class RecipeService {
     }
 
     @Transactional
-    public IngredientResponse addIngredient(UUID recipeId, IngredientRequest ingredientRequest) {
-        UserPrincipal user = authService.getAuthenticatedUserPrincipal();
+    public IngredientResponse addIngredient(UUID recipeId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
                 new EntityNotFoundException("recipe not found"));
-        if (!Objects.equals(user.getId(), recipe.getCreator().getId())) {
+        if (!Objects.equals(userId, recipe.getCreator().getId())) {
             throw new AccessDeniedException("this recipe is not your");
         }
         Ingredient ingredient = ingredientMapper.toEntity(ingredientRequest);

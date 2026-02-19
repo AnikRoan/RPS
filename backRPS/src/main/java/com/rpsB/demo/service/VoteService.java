@@ -7,7 +7,6 @@ import com.rpsB.demo.entity.User;
 import com.rpsB.demo.entity.Vote;
 import com.rpsB.demo.mapper.VoteMapper;
 import com.rpsB.demo.repository.VoteRepository;
-import com.rpsB.demo.security.UserPrincipal;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -28,20 +27,18 @@ public class VoteService {
 
     private final VoteRepository voteRepository;
     private final VoteMapper voteMapper;
-    private final AuthService authService;
     private final EntityManager entityManager;
 
 
     @Transactional
-    public VoteResponse createVote(VoteRequest request, UUID recipeId) {
+    public VoteResponse createVote(VoteRequest request, UUID recipeId, Long userId) {
 
         if (request == null) {
             throw new IllegalArgumentException("Vote request cannot be null");
         }
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
         Vote vote = voteMapper.toEntity(request);
         vote.setUserVote(
-                entityManager.getReference(User.class, principal.getId())
+                entityManager.getReference(User.class, userId)
         );
         vote.setRecipe(
                 entityManager.getReference(Recipe.class, recipeId)
@@ -55,11 +52,10 @@ public class VoteService {
     }
 
     @Transactional
-    public VoteResponse updateVote(VoteRequest request, UUID recipeId, Long vote_id) {
+    public VoteResponse updateVote(VoteRequest request, UUID recipeId, Long vote_id, Long userId) {
         if (request == null) {
             throw new IllegalArgumentException("Vote request cannot be null");
         }
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
         Vote vote = voteRepository.findById(vote_id).orElseThrow(() ->
                 new EntityNotFoundException("Vote not found")
         );
@@ -68,7 +64,7 @@ public class VoteService {
             throw new IllegalArgumentException("Vote does not belong to this recipe");
         }
 
-        if (!Objects.equals(vote.getUserVote().getId(), principal.getId())) {
+        if (!Objects.equals(vote.getUserVote().getId(), userId)) {
             throw new IllegalArgumentException("You are not vote owner");
         }
         Optional.ofNullable(request.value()).ifPresent(vote::setValue);
@@ -84,14 +80,13 @@ public class VoteService {
     }
 
     @Transactional
-    public String deleteVote(UUID recipeId, Long voteId) {
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
+    public String deleteVote(UUID recipeId, Long voteId, Long userId) {
 
         Vote vote = voteRepository
                 .findByIdAndRecipeId(recipeId, voteId)
                 .orElseThrow(() -> new RuntimeException("Vote not found"));
 
-        if (!Objects.equals(vote.getUserVote().getId(), principal.getId())) {
+        if (!Objects.equals(vote.getUserVote().getId(), userId)) {
             throw new RuntimeException("Access denied");
         }
 
