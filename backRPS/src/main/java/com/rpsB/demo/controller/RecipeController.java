@@ -6,6 +6,7 @@ import com.rpsB.demo.dto.IngredientResponse;
 import com.rpsB.demo.dto.RecipeRequest;
 import com.rpsB.demo.dto.RecipeResponse;
 import com.rpsB.demo.dto.RecipeUpdateDto;
+import com.rpsB.demo.security.oauth2.CurrentUserProvider;
 import com.rpsB.demo.service.RecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,17 +29,18 @@ import java.util.UUID;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final CurrentUserProvider userProvider;
 
     @PostMapping()
     public ResponseEntity<RecipeResponse> createRecipe(@RequestBody RecipeRequest recipeRequest) {
 
-        return ResponseEntity.ok().body(recipeService.createRecipe(recipeRequest));
+        return ResponseEntity.ok().body(recipeService.createRecipe(recipeRequest, userProvider.getAuthUserPrincipalId()));
     }
 
     @PutMapping("/{recipeId}")
     public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable UUID recipeId,
                                                        @RequestBody RecipeUpdateDto updateDto) {
-        return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId));
+        return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId,userProvider.getAuthUserPrincipalId()));
     }
 
     @GetMapping("/{id}")
@@ -49,12 +51,12 @@ public class RecipeController {
     @GetMapping("/my")
     public ResponseEntity<Page<RecipeResponse>> getUserRecipes(@RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok().body(recipeService.getMyRecipes(page, size));
+        return ResponseEntity.ok().body(recipeService.getMyRecipes(page, size, userProvider.getAuthUserPrincipalId()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecipe(@PathVariable UUID id) {
-        recipeService.deliteRecipeById(id);
+        recipeService.deliteRecipeById(id, userProvider.getAuthUserPrincipalId());
         return ResponseEntity.ok().body(id);
     }
 
@@ -63,18 +65,18 @@ public class RecipeController {
     public ResponseEntity<IngredientResponse> updateIngredient(@PathVariable UUID recipeId,
                                                                @PathVariable Long ingredientId,
                                                                @RequestBody IngredientRequest ingredientRequest) {
-        return ResponseEntity.ok().body(recipeService.updateIngredient(recipeId, ingredientId, ingredientRequest));
+        return ResponseEntity.ok().body(recipeService.updateIngredient(recipeId, ingredientId, ingredientRequest, userProvider.getAuthUserPrincipalId()));
     }
 
     @DeleteMapping("/{recipeId}/ingredient/{ingredientId}")
     public void deleteIngredient(@PathVariable UUID recipeId,
                                  @PathVariable Long ingredientId) {
-        recipeService.deleteIngredient(recipeId, ingredientId);
+        recipeService.deleteIngredient(recipeId, ingredientId,userProvider.getAuthUserPrincipalId());
     }
 
     @PostMapping("/{recipeId}")
     public ResponseEntity<IngredientResponse> addIngredient(@PathVariable UUID recipeId,
                                                            @RequestBody IngredientRequest ingredientRequest) {
-        return ResponseEntity.ok().body(recipeService.addIngredient(recipeId, ingredientRequest));
+        return ResponseEntity.ok().body(recipeService.addIngredient(recipeId, ingredientRequest,userProvider.getAuthUserPrincipalId()));
     }
 }

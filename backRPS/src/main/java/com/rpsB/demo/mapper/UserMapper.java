@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(
-        componentModel = "string"
+        componentModel = "spring"
 )
 public interface UserMapper {
 

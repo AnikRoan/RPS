@@ -5,7 +5,6 @@ import com.rpsB.demo.dto.UserUpdateDto;
 import com.rpsB.demo.entity.User;
 import com.rpsB.demo.mapper.UserMapper;
 import com.rpsB.demo.repository.UserRepository;
-import com.rpsB.demo.security.UserPrincipal;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.errors.ApiException;
@@ -20,7 +19,6 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final AuthService authService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -38,16 +36,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public UserDto getMe() {
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
-        return userMapper.toDto(userRepository.findById(principal.getId()).orElseThrow(() ->
+    public UserDto getMe(Long userId) {
+        return userMapper.toDto(userRepository.findById(userId).orElseThrow(() ->
                 new UsernameNotFoundException("User not found")));
     }
 
     @Transactional
-    public UserDto updateMe(UserUpdateDto updateDto) {
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
-        User user = userRepository.findById(principal.getId()).orElseThrow(() ->
+    public UserDto updateMe(UserUpdateDto updateDto, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
                 new UsernameNotFoundException("Usr not found"));
 
         Optional.ofNullable(updateDto.name())
@@ -65,9 +61,8 @@ public class UserService {
 
 
     @Transactional
-    public String deleteMe() {
-        UserPrincipal principal = authService.getAuthenticatedUserPrincipal();
-        User user = userRepository.findById(principal.getId()).orElseThrow(() ->
+    public String deleteMe(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
                 new UsernameNotFoundException("User not found"));
 
         userRepository.delete(user);
