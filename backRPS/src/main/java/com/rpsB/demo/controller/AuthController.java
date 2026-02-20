@@ -32,5 +32,4 @@ public class AuthController {
     public TokenDto refreshToken(@RequestBody TokenDto tokenDto) {
         return authService.updateRefreshToken(tokenDto);
     }
-
 }

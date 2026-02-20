@@ -30,14 +30,21 @@ public class VoteController {
     @PostMapping()
     public ResponseEntity<VoteResponse> createVote(@PathVariable UUID recipeId,
                                                    @RequestBody VoteRequest request) {
-        return ResponseEntity.ok().body(voteService.createVote(request, recipeId, userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(voteService.createVote(
+                request,
+                recipeId,
+                userProvider.getAuthUserPrincipalId()));
     }
 
     @PutMapping("/{voteId}")
     public ResponseEntity<VoteResponse> updateVote(@PathVariable UUID recipeId,
                                                    @PathVariable Long voteId,
                                                    @RequestBody VoteRequest request) {
-        return ResponseEntity.ok().body(voteService.updateVote(request, recipeId, voteId, userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(voteService.updateVote(
+                request,
+                recipeId,
+                voteId,
+                userProvider.getAuthUserPrincipalId()));
     }
 
     @GetMapping()
@@ -50,6 +57,9 @@ public class VoteController {
     @DeleteMapping("/{voteId}")
     public ResponseEntity<String> deliteVote(@PathVariable UUID recipeId,
                                              @PathVariable Long voteId) {
-        return ResponseEntity.ok().body(voteService.deleteVote(recipeId, voteId, userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(voteService.deleteVote(
+                recipeId,
+                voteId,
+                userProvider.getAuthUserPrincipalId()));
     }
 }

@@ -1,6 +1,7 @@
 package com.rpsB.demo.security.jwt;
 
 import com.rpsB.demo.entity.User;
+import com.rpsB.demo.exception.AppException;
 import com.rpsB.demo.repository.UserRepository;
 import com.rpsB.demo.security.UserPrincipal;
 import io.jsonwebtoken.Claims;
@@ -13,8 +14,8 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.common.errors.ApiException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -69,7 +70,6 @@ public class JwtProvider {
                 .issuedAt(now)
                 .expiration(validity)
                 .compact();
-
     }
 
     public boolean validateToken(String accessToken) {
@@ -87,7 +87,6 @@ public class JwtProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
-
     }
 
     public Authentication getAuthenticationExpiredToken(String accessToken) {
@@ -104,7 +103,7 @@ public class JwtProvider {
         }
         Long userId = Long.parseLong(subject);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException("User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT,"User not found"));
 
         UserPrincipal userPrincipal = new UserPrincipal(user);
         return new UsernamePasswordAuthenticationToken(userPrincipal,
@@ -121,7 +120,7 @@ public class JwtProvider {
         Long userId = Long.parseLong(subject);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException("User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT,"User not found"));
 
         UserPrincipal userPrincipal = new UserPrincipal(user);
         return new UsernamePasswordAuthenticationToken(userPrincipal,

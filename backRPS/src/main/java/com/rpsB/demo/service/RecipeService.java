@@ -8,18 +8,17 @@ import com.rpsB.demo.dto.RecipeUpdateDto;
 import com.rpsB.demo.entity.Ingredient;
 import com.rpsB.demo.entity.Recipe;
 import com.rpsB.demo.entity.User;
+import com.rpsB.demo.exception.AppException;
 import com.rpsB.demo.mapper.IngredientMapper;
 import com.rpsB.demo.mapper.RecipeMapper;
 import com.rpsB.demo.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -37,7 +36,6 @@ public class RecipeService {
 
     @Transactional
     public RecipeResponse createRecipe(RecipeRequest recipeRequest, Long userId) {
-
         Recipe recipe = recipeMapper.toEntity(recipeRequest);
         recipe.setCreator(entityManager.getReference(User.class, userId));
 
@@ -51,10 +49,10 @@ public class RecipeService {
     @Transactional
     public RecipeResponse updateRecipe(RecipeUpdateDto updateRecipe, UUID recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
-                () -> new EntityNotFoundException("Recipe not found"));
+                () -> new AppException(HttpStatus.NO_CONTENT, "Recipe not found"));
 
         if (!recipe.getCreator().getId().equals(userId)) {
-            throw new AccessDeniedException("You are not the owner");
+            throw new AppException(HttpStatus.FORBIDDEN, "You are not the owner");
         }
 
         Optional.ofNullable(updateRecipe.name()).ifPresent(recipe::setName);
@@ -66,9 +64,8 @@ public class RecipeService {
     }
 
     public RecipeResponse getRecipeById(UUID recipeId) {
-
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
-                () -> new EntityNotFoundException("Recipe not found")
+                () -> new AppException(HttpStatus.NO_CONTENT, "Recipe not found")
         );
 
         return recipeMapper.toDto(recipe);
@@ -82,9 +79,9 @@ public class RecipeService {
     }
 
     @Transactional
-    public void deliteRecipeById(UUID recipeId,Long userId) {
+    public void deliteRecipeById(UUID recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
-                () -> new EntityNotFoundException("Recipe not found")
+                () -> new AppException(HttpStatus.NO_CONTENT, "Recipe not found")
         );
         if (Objects.equals(recipe.getCreator().getId(), userId)) {
             recipeRepository.deleteById(recipeId);
@@ -92,21 +89,19 @@ public class RecipeService {
     }
 
     //    Actions with ingredient
-
     @Transactional
     public IngredientResponse updateIngredient(UUID recipeId, Long ingredientId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
-                new EntityNotFoundException("recipe not found"));
+                new AppException(HttpStatus.NO_CONTENT, "Recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
-            throw new UsernameNotFoundException("this recipe is not your");
+            throw new AppException(HttpStatus.FORBIDDEN, "this recipe is not your");
         }
         Ingredient ingredient = recipe.getIngredientList()
                 .stream()
                 .filter(i -> i.getId().equals(ingredientId))
                 .findFirst()
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Ingredient not found"));
-
+                        new AppException(HttpStatus.NO_CONTENT, "Ingredient not found"));
 
         Optional.ofNullable(ingredientRequest.name()).ifPresent(ingredient::setName);
         Optional.ofNullable(ingredientRequest.amount()).ifPresent(ingredient::setAmount);
@@ -121,16 +116,16 @@ public class RecipeService {
 
     public void deleteIngredient(UUID recipeId, Long ingredientId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
-                new EntityNotFoundException("recipe not found"));
+                new AppException(HttpStatus.NO_CONTENT, "recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
-            throw new UsernameNotFoundException("this recipe is not your");
+            throw new AppException(HttpStatus.FORBIDDEN, "this recipe is not your");
         }
         Ingredient ingredient = recipe.getIngredientList()
                 .stream()
                 .filter(i -> i.getId().equals(ingredientId))
                 .findFirst()
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Ingredient not found"));
+                        new AppException(HttpStatus.NO_CONTENT, "Ingredient not found"));
 
         recipe.getIngredientList().remove(ingredient);
     }
@@ -138,9 +133,9 @@ public class RecipeService {
     @Transactional
     public IngredientResponse addIngredient(UUID recipeId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
-                new EntityNotFoundException("recipe not found"));
+                new AppException(HttpStatus.NO_CONTENT, "recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
-            throw new AccessDeniedException("this recipe is not your");
+            throw new AppException(HttpStatus.FORBIDDEN, "this recipe is not your");
         }
         Ingredient ingredient = ingredientMapper.toEntity(ingredientRequest);
 
