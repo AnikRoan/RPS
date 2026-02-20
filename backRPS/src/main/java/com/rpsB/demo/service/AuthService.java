@@ -71,7 +71,6 @@ public class AuthService {
 
     @Transactional
     public TokenDto updateRefreshToken(TokenDto tokenDto) {
-
         if (!jwtProvider.validateToken(tokenDto.refreshToken())) {
             throw new ApiException("Not validated refresh token");
         }
@@ -88,7 +87,6 @@ public class AuthService {
                         principal.getAuthorities()
                 );
 
-        // rotation (очень важно)
         refreshTokenService.revoke(storedToken);
 
         String newAccessToken = jwtProvider.createAccessToken(authentication);
@@ -107,13 +105,4 @@ public class AuthService {
                 .refreshToken(newRefreshToken)
                 .build();
     }
-
-//    public UserPrincipal getAuthenticatedUserPrincipal() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new ApiException("User must be authenticated");
-//        }
-//
-//        return (UserPrincipal) authentication.getPrincipal();
-//    }
 }

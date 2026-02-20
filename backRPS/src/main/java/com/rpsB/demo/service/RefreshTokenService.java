@@ -2,9 +2,11 @@ package com.rpsB.demo.service;
 
 import com.rpsB.demo.entity.RefreshToken;
 import com.rpsB.demo.entity.User;
+import com.rpsB.demo.exception.AppException;
 import com.rpsB.demo.repository.RefreshTokenRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -36,14 +38,14 @@ public class RefreshTokenService {
 
     public RefreshToken validateAndGet(String jti) {
         RefreshToken token = refreshTokenRepository.findByRefreshId(jti)
-                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT, "Refresh token not found"));
 
         if (token.isRevoked()) {
-            throw new RuntimeException("Refresh token revoked");
+            throw new AppException(HttpStatus.NO_CONTENT, "Refresh token revoked");
         }
 
         if (token.getExpiresAt().isBefore(Instant.now())) {
-            throw new RuntimeException("Refresh token expired");
+            throw new AppException(HttpStatus.FORBIDDEN, "Refresh token expired");
         }
 
         return token;

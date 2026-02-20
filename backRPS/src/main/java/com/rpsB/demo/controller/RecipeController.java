@@ -34,30 +34,38 @@ public class RecipeController {
     @PostMapping()
     public ResponseEntity<RecipeResponse> createRecipe(@RequestBody RecipeRequest recipeRequest) {
 
-        return ResponseEntity.ok().body(recipeService.createRecipe(recipeRequest, userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(recipeService.createRecipe(
+                recipeRequest,
+                userProvider.getAuthUserPrincipalId()));
     }
 
     @PutMapping("/{recipeId}")
     public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable UUID recipeId,
                                                        @RequestBody RecipeUpdateDto updateDto) {
-        return ResponseEntity.ok().body(recipeService.updateRecipe(updateDto, recipeId,userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(recipeService.updateRecipe(
+                updateDto,
+                recipeId,
+                userProvider.getAuthUserPrincipalId()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable UUID id) {
-        return ResponseEntity.ok().body(recipeService.getRecipeById(id));
+    @GetMapping("/{recipeId}")
+    public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable UUID recipeId) {
+        return ResponseEntity.ok().body(recipeService.getRecipeById(recipeId));
     }
 
     @GetMapping("/my")
     public ResponseEntity<Page<RecipeResponse>> getUserRecipes(@RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok().body(recipeService.getMyRecipes(page, size, userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(recipeService.getMyRecipes(
+                page,
+                size,
+                userProvider.getAuthUserPrincipalId()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable UUID id) {
-        recipeService.deliteRecipeById(id, userProvider.getAuthUserPrincipalId());
-        return ResponseEntity.ok().body(id);
+    @DeleteMapping("/{recipeId}")
+    public ResponseEntity<?> deleteRecipe(@PathVariable UUID recipeId) {
+        recipeService.deliteRecipeById(recipeId, userProvider.getAuthUserPrincipalId());
+        return ResponseEntity.ok().body(recipeId);
     }
 
     //    Actions with ingredient
@@ -65,18 +73,25 @@ public class RecipeController {
     public ResponseEntity<IngredientResponse> updateIngredient(@PathVariable UUID recipeId,
                                                                @PathVariable Long ingredientId,
                                                                @RequestBody IngredientRequest ingredientRequest) {
-        return ResponseEntity.ok().body(recipeService.updateIngredient(recipeId, ingredientId, ingredientRequest, userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(recipeService.updateIngredient(
+                recipeId,
+                ingredientId,
+                ingredientRequest,
+                userProvider.getAuthUserPrincipalId()));
     }
 
     @DeleteMapping("/{recipeId}/ingredient/{ingredientId}")
     public void deleteIngredient(@PathVariable UUID recipeId,
                                  @PathVariable Long ingredientId) {
-        recipeService.deleteIngredient(recipeId, ingredientId,userProvider.getAuthUserPrincipalId());
+        recipeService.deleteIngredient(recipeId, ingredientId, userProvider.getAuthUserPrincipalId());
     }
 
     @PostMapping("/{recipeId}")
     public ResponseEntity<IngredientResponse> addIngredient(@PathVariable UUID recipeId,
-                                                           @RequestBody IngredientRequest ingredientRequest) {
-        return ResponseEntity.ok().body(recipeService.addIngredient(recipeId, ingredientRequest,userProvider.getAuthUserPrincipalId()));
+                                                            @RequestBody IngredientRequest ingredientRequest) {
+        return ResponseEntity.ok().body(recipeService.addIngredient(
+                recipeId,
+                ingredientRequest,
+                userProvider.getAuthUserPrincipalId()));
     }
 }
