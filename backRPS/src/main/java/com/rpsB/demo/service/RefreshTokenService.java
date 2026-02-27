@@ -56,12 +56,14 @@ public class RefreshTokenService {
         List<RefreshToken> tokens =
                 refreshTokenRepository
                         .findByUserIdAndRevokedFalseOrderByCreatedAtAsc(userId);
+
         if (tokens.size() < maxTokens) {
             return;
         }
-        int toDelete = tokens.size() - maxTokens + 1;
 
-        for (int i = 0; i < toDelete; i++) {
+        int toRevoke = tokens.size() - maxTokens + 1;
+
+        for (int i = 0; i < toRevoke; i++) {
             tokens.get(i).setRevoked(true);
         }
     }

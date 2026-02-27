@@ -6,12 +6,13 @@ import com.rpsB.demo.dto.UserCreateDto;
 import com.rpsB.demo.entity.RefreshToken;
 import com.rpsB.demo.entity.User;
 import com.rpsB.demo.enums.Role;
+import com.rpsB.demo.exception.AppException;
 import com.rpsB.demo.security.UserPrincipal;
 import com.rpsB.demo.security.jwt.JwtProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.apache.kafka.common.errors.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,9 +35,9 @@ public class AuthService {
 
     @Transactional
     public TokenDto login(LoginDto loginDto) {
-        String email = userService.resolvEmail(loginDto.email());
+
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email, loginDto.password()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String accessToken = jwtProvider.createAccessToken(authentication);
@@ -66,13 +67,12 @@ public class AuthService {
                 .role(Role.USER)
                 .build();
         userService.save(user);
-
     }
 
     @Transactional
     public TokenDto updateRefreshToken(TokenDto tokenDto) {
         if (!jwtProvider.validateToken(tokenDto.refreshToken())) {
-            throw new ApiException("Not validated refresh token");
+            throw new AppException(HttpStatus.FORBIDDEN,"Not validated refresh token");
         }
         String jti = jwtProvider.getJtiAllowExpired(tokenDto.refreshToken());
 

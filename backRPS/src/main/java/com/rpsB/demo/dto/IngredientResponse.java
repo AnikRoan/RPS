@@ -1,8 +1,10 @@
 package com.rpsB.demo.dto;
 
+import java.util.UUID;
+
 public record IngredientResponse(
         Long id,
-        Long recipe_id,
+        UUID recipeId,
         String name,
         Double amount,
         String unit,

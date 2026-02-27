@@ -76,5 +76,4 @@ public class Recipe {
         ingredientList.add(ingredient);
         ingredient.setRecipe(this);
     }
-
 }

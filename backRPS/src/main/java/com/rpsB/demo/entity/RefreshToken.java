@@ -1,6 +1,7 @@
 package com.rpsB.demo.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -16,7 +17,7 @@ import java.time.Instant;
 public class RefreshToken {
     @Id
     private String id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
     private Instant expiresAt;
     private Instant createdAt;

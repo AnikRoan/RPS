@@ -23,14 +23,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
-    public String resolvEmail(String email) {
-        return userRepository.findEmail(email).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "User not found"));
-    }
-
     public User loadUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     public User save(User user) {
@@ -39,13 +34,13 @@ public class UserService {
 
     public UserDto getMe(Long userId) {
         return userMapper.toDto(userRepository.findById(userId).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "User not found")));
+                new AppException(HttpStatus.NOT_FOUND, "User not found")));
     }
 
     @Transactional
     public UserDto updateMe(UserUpdateDto updateDto, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "Usr not found"));
+                new AppException(HttpStatus.NOT_FOUND, "Usr not found"));
 
         Optional.ofNullable(updateDto.name())
                 .ifPresent(user::changeName);
@@ -60,11 +55,10 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
-
     @Transactional
     public String deleteMe(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "User not found"));
+                new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
         userRepository.delete(user);
         return "User was deleted";

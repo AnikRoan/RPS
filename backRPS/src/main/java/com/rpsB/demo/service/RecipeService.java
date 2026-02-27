@@ -49,7 +49,7 @@ public class RecipeService {
     @Transactional
     public RecipeResponse updateRecipe(RecipeUpdateDto updateRecipe, UUID recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
-                () -> new AppException(HttpStatus.NO_CONTENT, "Recipe not found"));
+                () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found"));
 
         if (!recipe.getCreator().getId().equals(userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "You are not the owner");
@@ -65,7 +65,7 @@ public class RecipeService {
 
     public RecipeResponse getRecipeById(UUID recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
-                () -> new AppException(HttpStatus.NO_CONTENT, "Recipe not found")
+                () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found")
         );
 
         return recipeMapper.toDto(recipe);
@@ -81,7 +81,7 @@ public class RecipeService {
     @Transactional
     public void deliteRecipeById(UUID recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
-                () -> new AppException(HttpStatus.NO_CONTENT, "Recipe not found")
+                () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found")
         );
         if (Objects.equals(recipe.getCreator().getId(), userId)) {
             recipeRepository.deleteById(recipeId);
@@ -92,7 +92,7 @@ public class RecipeService {
     @Transactional
     public IngredientResponse updateIngredient(UUID recipeId, Long ingredientId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "Recipe not found"));
+                new AppException(HttpStatus.NOT_FOUND, "Recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
             throw new AppException(HttpStatus.FORBIDDEN, "this recipe is not your");
         }
@@ -101,7 +101,7 @@ public class RecipeService {
                 .filter(i -> i.getId().equals(ingredientId))
                 .findFirst()
                 .orElseThrow(() ->
-                        new AppException(HttpStatus.NO_CONTENT, "Ingredient not found"));
+                        new AppException(HttpStatus.NOT_FOUND, "Ingredient not found"));
 
         Optional.ofNullable(ingredientRequest.name()).ifPresent(ingredient::setName);
         Optional.ofNullable(ingredientRequest.amount()).ifPresent(ingredient::setAmount);
@@ -116,7 +116,7 @@ public class RecipeService {
 
     public void deleteIngredient(UUID recipeId, Long ingredientId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "recipe not found"));
+                new AppException(HttpStatus.NOT_FOUND, "recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
             throw new AppException(HttpStatus.FORBIDDEN, "this recipe is not your");
         }
@@ -125,7 +125,7 @@ public class RecipeService {
                 .filter(i -> i.getId().equals(ingredientId))
                 .findFirst()
                 .orElseThrow(() ->
-                        new AppException(HttpStatus.NO_CONTENT, "Ingredient not found"));
+                        new AppException(HttpStatus.NOT_FOUND, "Ingredient not found"));
 
         recipe.getIngredientList().remove(ingredient);
     }
@@ -133,7 +133,7 @@ public class RecipeService {
     @Transactional
     public IngredientResponse addIngredient(UUID recipeId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "recipe not found"));
+                new AppException(HttpStatus.NOT_FOUND, "recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
             throw new AppException(HttpStatus.FORBIDDEN, "this recipe is not your");
         }

@@ -47,7 +47,8 @@ public class VoteService {
         try {
             return voteMapper.toDto(voteRepository.save(vote));
         } catch (DataIntegrityViolationException ex) {
-            throw new AppException(HttpStatus.NO_CONTENT, "Recipe not found");
+            throw new AppException(HttpStatus.FORBIDDEN, "Recipe not found," +
+                                                         " or you can not write more votes to this recipe");
         }
     }
 
@@ -57,11 +58,11 @@ public class VoteService {
             throw new IllegalArgumentException("Vote request cannot be null");
         }
         Vote vote = voteRepository.findById(vote_id).orElseThrow(() ->
-                new AppException(HttpStatus.NO_CONTENT, "Vote not found")
+                new AppException(HttpStatus.NOT_FOUND, "Vote not found")
         );
 
         if (!vote.getRecipe().getUuid().equals(recipeId)) {
-            throw new AppException(HttpStatus.NO_CONTENT, "Vote does not belong to this recipe");
+            throw new AppException(HttpStatus.NOT_FOUND, "Vote does not belong to this recipe");
         }
 
         if (!Objects.equals(vote.getUserVote().getId(), userId)) {
@@ -83,7 +84,7 @@ public class VoteService {
     public String deleteVote(UUID recipeId, Long voteId, Long userId) {
         Vote vote = voteRepository
                 .findByIdAndRecipeId(recipeId, voteId)
-                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT, "Vote not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Vote not found"));
 
         if (!Objects.equals(vote.getUserVote().getId(), userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "Access denied");
