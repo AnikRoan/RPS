@@ -7,7 +7,6 @@ import com.rpsB.demo.security.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -72,19 +71,20 @@ public class JwtProvider {
                 .compact();
     }
 
-    public boolean validateToken(String accessToken) {
+    public boolean validateToken(String token) {
         try {
             Jws<Claims> claimsJws = Jwts.parser()
                     .verifyWith(key)
                     .build()
-                    .parseSignedClaims(accessToken);
+                    .parseSignedClaims(token);
 
             return !claimsJws
                     .getPayload()
                     .getExpiration()
                     .before(new Date());
 
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -103,7 +103,7 @@ public class JwtProvider {
         }
         Long userId = Long.parseLong(subject);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT,"User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT, "User not found"));
 
         UserPrincipal userPrincipal = new UserPrincipal(user);
         return new UsernamePasswordAuthenticationToken(userPrincipal,
@@ -120,7 +120,7 @@ public class JwtProvider {
         Long userId = Long.parseLong(subject);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT,"User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT, "User not found"));
 
         UserPrincipal userPrincipal = new UserPrincipal(user);
         return new UsernamePasswordAuthenticationToken(userPrincipal,

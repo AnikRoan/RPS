@@ -28,7 +28,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<UserDto> updateMe(@RequestBody UserUpdateDto updateDto) {
-        return ResponseEntity.ok().body(userService.updateMe(updateDto,userProvider.getAuthUserPrincipalId()));
+        return ResponseEntity.ok().body(userService.updateMe(updateDto, userProvider.getAuthUserPrincipalId()));
     }
 
     @DeleteMapping("/me")
