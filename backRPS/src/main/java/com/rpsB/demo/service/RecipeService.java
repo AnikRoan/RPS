@@ -79,7 +79,7 @@ public class RecipeService {
     }
 
     @Transactional
-    public void deliteRecipeById(UUID recipeId, Long userId) {
+    public void deleteRecipeById(UUID recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found")
         );

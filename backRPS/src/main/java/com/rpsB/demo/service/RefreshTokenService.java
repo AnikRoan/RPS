@@ -38,10 +38,10 @@ public class RefreshTokenService {
 
     public RefreshToken validateAndGet(String jti) {
         RefreshToken token = refreshTokenRepository.findByRefreshId(jti)
-                .orElseThrow(() -> new AppException(HttpStatus.NO_CONTENT, "Refresh token not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Refresh token not found"));
 
         if (token.isRevoked()) {
-            throw new AppException(HttpStatus.NO_CONTENT, "Refresh token revoked");
+            throw new AppException(HttpStatus.NOT_FOUND, "Refresh token revoked");
         }
 
         if (token.getExpiresAt().isBefore(Instant.now())) {
