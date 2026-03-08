@@ -1,5 +1,6 @@
 package com.rpsB.demo.repository;
 
+import com.rpsB.demo.dto.RecipeShort;
 import com.rpsB.demo.entity.Recipe;
 import com.rpsB.demo.enums.SendStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -21,21 +23,56 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             """)
     Page<Recipe> findAllUserRecipe(@Param("userId") Long userId, Pageable pageable);
 
-    @Query(value = "SELECT * FROM recipes WHERE uuid = ANY(:uuids)", nativeQuery = true)
-    List<Recipe> findByUuids(@Param("uuids") UUID[] uuids);
-
     @Query("""
-            SELECT r FROM Recipe  r
-            WHERE r.status = 'PENDING'            
+            SELECT new com.rpsB.demo.dto.RecipeShort(
+                        r.uuid,
+                        r.name,
+                        r.description, 
+                        r.timeToCookMinutes,
+                        r.averageVote,
+                        r.category,
+                        r.creator.id,
+                        r.created_at                                                
+                                                )
+            FROM Recipe r 
+            WHERE r.uuid IN :uuids
             """)
-    List<Recipe> findByStatusPending();
+    List<RecipeShort> findByLockedUuids(@Param("uuids")List<UUID> uuids);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            UPDATE Recipe 
+            SET status = :sendStatus
+            WHERE uuid IN :uuids                        
+            """)
+    void updateStatus(@Param("uuids") List<UUID> uuids,
+                      @Param("sendStatus") SendStatus sendStatus);
+
+    @Query(value = """
+            SELECT uuid
+            FROM recipes
+            WHERE status = 'PENDING'
+            AND updated_at < now() - interval '5 minutes'
+            ORDER BY updated_at ASC
+            FOR UPDATE SKIP LOCKED
+            LIMIT 100
+            """, nativeQuery = true)
+    List<UUID> lockPendingIds();
 
     @Modifying
+    @Query(value = """
+        UPDATE recipe
+        SET status = 'PENDING'
+        WHERE status = 'SENDING'
+        AND updated_at < now() - interval '5 minutes'
+        """,
+            nativeQuery = true)
+    int recoverStuckSending();
+
     @Query("""
-            UPDATE Recipe r 
-            SET r.status = :status
-            WHERE r.uuid = :uuid                               
+            SELECT r 
+            FROM Recipe r 
+            WHERE r.uuid IN :recipeIds             
             """)
-    int updateStaus(@Param("uuid") UUID uuid,
-                    @Param("status") SendStatus status);
+    Optional<List<Recipe>> findByRecipeIds(List<UUID> recipeIds);
 }

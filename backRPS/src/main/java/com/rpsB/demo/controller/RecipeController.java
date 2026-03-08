@@ -5,6 +5,7 @@ import com.rpsB.demo.dto.IngredientRequest;
 import com.rpsB.demo.dto.IngredientResponse;
 import com.rpsB.demo.dto.RecipeRequest;
 import com.rpsB.demo.dto.RecipeResponse;
+import com.rpsB.demo.dto.RecipeSearchText;
 import com.rpsB.demo.dto.RecipeUpdateDto;
 import com.rpsB.demo.security.oauth2.CurrentUserProvider;
 import com.rpsB.demo.service.RecipeService;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,6 +32,11 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final CurrentUserProvider userProvider;
+
+    @PostMapping("/search")
+    public ResponseEntity<List<RecipeResponse>> searchRecipes(@RequestBody RecipeSearchText text) {
+        return  ResponseEntity.ok().body(recipeService.searchRecipe(text.text()));
+    }
 
     @PostMapping()
     public ResponseEntity<RecipeResponse> createRecipe(@RequestBody RecipeRequest recipeRequest) {

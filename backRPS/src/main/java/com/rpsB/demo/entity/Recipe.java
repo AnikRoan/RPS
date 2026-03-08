@@ -36,7 +36,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-//@DynamicUpdate optimize queri
 public class Recipe {
     @Id
     @GeneratedValue
@@ -60,7 +59,9 @@ public class Recipe {
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private SendStatus status = SendStatus.PENDING;
 
     @Enumerated(EnumType.STRING)

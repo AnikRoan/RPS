@@ -8,10 +8,12 @@ import com.rpsB.demo.dto.RecipeUpdateDto;
 import com.rpsB.demo.entity.Ingredient;
 import com.rpsB.demo.entity.Recipe;
 import com.rpsB.demo.entity.User;
+import com.rpsB.demo.enums.SendStatus;
 import com.rpsB.demo.exception.AppException;
 import com.rpsB.demo.mapper.IngredientMapper;
 import com.rpsB.demo.mapper.RecipeMapper;
 import com.rpsB.demo.repository.RecipeRepository;
+import com.rpsB.demo.server.PythonGrpcClient;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,7 @@ public class RecipeService {
     private final IngredientMapper ingredientMapper;
     private final RecipeRepository recipeRepository;
     private final EntityManager entityManager;
+    private final PythonGrpcClient client;
 
     @Transactional
     public RecipeResponse createRecipe(RecipeRequest recipeRequest, Long userId) {
@@ -59,6 +65,9 @@ public class RecipeService {
         Optional.ofNullable(updateRecipe.description()).ifPresent(recipe::setDescription);
         Optional.ofNullable(updateRecipe.timeToCookMinutes()).ifPresent(recipe::setTimeToCookMinutes);
         Optional.ofNullable(updateRecipe.category()).ifPresent(recipe::setCategory);
+        if (recipe.getStatus() == SendStatus.SENT) {
+            recipe.setStatus(SendStatus.PENDING);
+        }
 
         return recipeMapper.toDto(recipe);
     }
@@ -111,6 +120,10 @@ public class RecipeService {
         Optional.ofNullable(ingredientRequest.fats()).ifPresent(ingredient::setFats);
         Optional.ofNullable(ingredientRequest.carbs()).ifPresent(ingredient::setCarbs);
 
+        if (recipe.getStatus() == SendStatus.SENT) {
+            recipe.setStatus(SendStatus.PENDING);
+        }
+
         return ingredientMapper.toDto(ingredient);
     }
 
@@ -141,5 +154,26 @@ public class RecipeService {
 
         recipe.addIngredient(ingredient);
         return ingredientMapper.toDto(ingredient);
+    }
+
+    public List<RecipeResponse> searchRecipe(String text) {
+        List<UUID> recipeIds = client.getRecipeIds(text);
+
+        if (recipeIds.isEmpty()) {
+            throw new AppException(HttpStatus.NOT_FOUND, "recipes not found");
+        }
+
+        List<Recipe> recipes = recipeRepository.findByRecipeIds(recipeIds).orElseThrow(() ->
+                new AppException(HttpStatus.NOT_FOUND, "recipe not found"));
+
+        Map<UUID, Recipe> recipeMap = recipes.stream()
+                .collect(Collectors.toMap(Recipe::getUuid, r -> r));
+
+        List<Recipe> orderedRecipes = recipeIds.stream()
+                .map(recipeMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+
+        return recipeMapper.toDtos(orderedRecipes);
     }
 }

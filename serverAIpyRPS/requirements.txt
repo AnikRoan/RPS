@@ -1,0 +1,6 @@
+sentence-transformers
+qdrant-client
+grpcio
+grpcio-tools
+confluent-kafka
+python-dotenv
