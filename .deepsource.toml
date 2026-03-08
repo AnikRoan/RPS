@@ -1,5 +1,11 @@
 version = 1
 
+exclude_patterns = [
+  "generated/*",
+  "*_pb2.py",
+  "*_pb2_grpc.py"
+]
+
 [[analyzers]]
 name = "java"
 

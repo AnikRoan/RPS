@@ -4,14 +4,16 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Service;
+import recipe.RecipeSearch;
+import recipe.RecipeSearchServiceGrpc;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PythonGrpcClient {
     private final ManagedChannel channel;
-    private final infoToAI.grpc.EchoServiceGrpc.EchoServiceBlockingStub stub;
+    private final RecipeSearchServiceGrpc.RecipeSearchServiceBlockingStub stub;
 
     public PythonGrpcClient() {
         this.channel = ManagedChannelBuilder
@@ -19,26 +21,20 @@ public class PythonGrpcClient {
                 .usePlaintext()
                 .build();
 
-        this.stub = infoToAI.grpc.EchoServiceGrpc.newBlockingStub(channel);
+        this.stub = RecipeSearchServiceGrpc.newBlockingStub(channel);
     }
 
-    public String sendText(String text) {
-        infoToAI.grpc.EchoRequest request = infoToAI.grpc.EchoRequest.newBuilder()
-                .setText(text)
+
+    public List<UUID> getRecipeIds(String text) {
+        RecipeSearch.SearchRequest request = RecipeSearch.SearchRequest.newBuilder()
+                .setQuery(text)
                 .build();
 
-        infoToAI.grpc.EchoReply reply = stub.echo(request);
-        return reply.getText();
-    }
-
-    public List<String> getRecipeIds(String text) {
-        infoToAI.grpc.EchoRequest request = infoToAI.grpc.EchoRequest.newBuilder()
-                .setText(text)
-                .build();
-
-        infoToAI.grpc.RecipeListId response = stub.getRecipeIds(request);
-        return response.getRecipeIdsList();
-
+        RecipeSearch.SearchResponse reply = stub.searchRecipes(request);
+        return reply.getRecipeIdsList()
+                .stream()
+                .map(UUID::fromString)
+                .toList();
     }
 
     @PreDestroy

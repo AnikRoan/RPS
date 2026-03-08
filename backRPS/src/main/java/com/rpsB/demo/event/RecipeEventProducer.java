@@ -1,18 +1,23 @@
 package com.rpsB.demo.event;
 
-import com.rpsB.demo.dto.RecipeResponse;
+import com.rpsB.demo.dto.IngredientFloatDto;
+import com.rpsB.demo.dto.RecipeForQuadrant;
+import com.rpsB.demo.dto.RecipeShort;
 import com.rpsB.demo.enums.SendStatus;
-import com.rpsB.demo.mapper.RecipeMapper;
+import com.rpsB.demo.repository.IngredientRepository;
 import com.rpsB.demo.repository.RecipeRepository;
-import jakarta.transaction.Transactional;
+import com.rpsB.demo.service.RecipeBatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -25,35 +30,66 @@ public class RecipeEventProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final RecipeRepository recipeRepository;
-    private final RecipeMapper recipeMapper;
+    private final IngredientRepository ingredientRepository;
+    private final RecipeBatchService recipeBatchService;
 
-    @Transactional
-    public void sendPendingRecipes(){
-        List<RecipeResponse> resipeResponseList = recipeMapper.toDtos(recipeRepository.findByStatusPending());
+
+    public void send() {
+        List<UUID> lockedRecipeId = recipeBatchService.acquireBatch();
+
+        if (lockedRecipeId.isEmpty()) return;
+
+        List<RecipeShort> recipeShorts = recipeRepository.findByLockedUuids(lockedRecipeId);
+        List<IngredientFloatDto> ingredientFloatDtos = ingredientRepository.findByRecipeId(lockedRecipeId);
+
+        Map<UUID, List<IngredientFloatDto>> grouped =
+                ingredientFloatDtos.stream()
+                        .collect(Collectors.groupingBy(
+                                IngredientFloatDto::recipeId));
+
+        List<RecipeForQuadrant> result = recipeShorts.stream()
+                .map(r -> new RecipeForQuadrant(
+                        r.uuid(),
+                        r.name(),
+                        r.description(),
+                        grouped.getOrDefault(r.uuid(), List.of()),
+                        r.timeToCookMinutes(),
+                        r.averageVote(),
+                        r.category(),
+                        r.userId(),
+                        r.created_at()
+                ))
+                .toList();
+
+
+        kafkaTemplate.send(topic, result)
+                .whenComplete((sendResult, ex) -> {
+                            if (ex == null) {
+                                log.info("Batch sent successfully");
+
+                                recipeRepository.updateStatus(
+                                        lockedRecipeId,
+                                        SendStatus.SENT
+                                );
+                            } else {
+                                log.error("Kafka send failed", ex);
+                                recipeRepository.updateStatus(
+                                        lockedRecipeId,
+                                        SendStatus.PENDING);
+                            }
+                        }
+
+                );
     }
 
 
-    public void send(RecipeResponse dto) {
-        kafkaTemplate.send(topic, dto.uuid().toString(), dto)
-                .thenAccept(result -> {
-                    log.info(result.getRecordMetadata().topic());
-
-                })
-                .exceptionally(ex -> {
-                    log.info(ex.getMessage());
-                    return null;
-
-                });
+    @Scheduled(fixedDelay = 6000)
+    public void sendEvent() {
+        send();
     }
 
-
-    @Transactional
-    public void markSent(UUID recipeId) {
-        recipeRepository.updateStaus(recipeId, SendStatus.SENT);
-    }
-
-    @Transactional
-    public void markFailed(UUID recipeId) {
-        recipeRepository.updateStaus(recipeId,SendStatus.PENDING);
+    @Scheduled(fixedDelay = 60000)
+    private void recoverJob() {
+        recipeBatchService.recoverStuckBatches();
     }
 }
