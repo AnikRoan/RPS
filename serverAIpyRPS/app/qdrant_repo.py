@@ -1,5 +1,6 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client import models
 
 
 class QdrantRepo:
@@ -12,7 +13,14 @@ class QdrantRepo:
         if collection not in existing:
             self.client.create_collection(
                 collection_name=collection,
-                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+                vectors_config=VectorParams(
+                    size=vector_size,
+                    distance=Distance.COSINE
+                ),
+                hnsw_config=models.HnswConfigDiff(
+                    m=32,
+                    ef_construct=200
+                )
             )
 
     def upsert_points(self, points):
@@ -24,10 +32,11 @@ class QdrantRepo:
     def search(self, vector: list[float], limit: int = 50):
         result = self.client.query_points(
             collection_name=self.collection,
-            query_vector=vector,
+            query=vector,
             limit=limit,
             with_payload=False,
             with_vectors=False,
+            timeout=3
         )
 
-        return [point.id for point in result.points]
+        return [str(point.id) for point in result.points]
