@@ -20,7 +20,7 @@ def process_recipe_batch(recipes, embedder, qdrant):
 
         texts.append(text)
 
-    vectors = embedder.embed_batch(texts)
+    vectors = embedder.embed_batch(texts, batch_size=16)
 
     points = []
 

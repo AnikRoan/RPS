@@ -3,6 +3,7 @@ package com.rpsB.demo.repository;
 import com.rpsB.demo.dto.RecipeShort;
 import com.rpsB.demo.entity.Recipe;
 import com.rpsB.demo.enums.SendStatus;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -39,6 +40,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             """)
     List<RecipeShort> findByLockedUuids(@Param("uuids")List<UUID> uuids);
 
+    @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE Recipe 
@@ -61,7 +63,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
 
     @Modifying
     @Query(value = """
-        UPDATE recipe
+        UPDATE recipes
         SET status = 'PENDING'
         WHERE status = 'SENDING'
         AND updated_at < now() - interval '5 minutes'

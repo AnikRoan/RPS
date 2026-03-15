@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface IngredientRepository extends JpaRepository<Long, Ingredient> {
+public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
     @Query(
             """

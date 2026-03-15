@@ -28,19 +28,25 @@ public class RecipeEventProducer {
     @Value("${spring.kafka.template.default-topic}")
     private String topic;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, List<RecipeForQuadrant>> kafkaTemplate;
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final RecipeBatchService recipeBatchService;
 
 
     public void send() {
+
         List<UUID> lockedRecipeId = recipeBatchService.acquireBatch();
 
-        if (lockedRecipeId.isEmpty()) return;
+        if (lockedRecipeId.isEmpty()) {
+            return;
+        }
 
-        List<RecipeShort> recipeShorts = recipeRepository.findByLockedUuids(lockedRecipeId);
-        List<IngredientFloatDto> ingredientFloatDtos = ingredientRepository.findByRecipeId(lockedRecipeId);
+        List<RecipeShort> recipeShorts =
+                recipeRepository.findByLockedUuids(lockedRecipeId);
+
+        List<IngredientFloatDto> ingredientFloatDtos =
+                ingredientRepository.findByRecipeId(lockedRecipeId);
 
         Map<UUID, List<IngredientFloatDto>> grouped =
                 ingredientFloatDtos.stream()
@@ -61,25 +67,40 @@ public class RecipeEventProducer {
                 ))
                 .toList();
 
+        try {
 
-        kafkaTemplate.send(topic, result)
-                .whenComplete((sendResult, ex) -> {
-                            if (ex == null) {
-                                log.info("Batch sent successfully");
+            kafkaTemplate.send(topic, result)
+                    .whenComplete((sendResult, ex) -> {
 
-                                recipeRepository.updateStatus(
-                                        lockedRecipeId,
-                                        SendStatus.SENT
-                                );
-                            } else {
-                                log.error("Kafka send failed", ex);
-                                recipeRepository.updateStatus(
-                                        lockedRecipeId,
-                                        SendStatus.PENDING);
-                            }
+                        if (ex == null) {
+
+                            log.info("Batch sent successfully");
+
+                            recipeRepository.updateStatus(
+                                    lockedRecipeId,
+                                    SendStatus.SENT
+                            );
+
+                        } else {
+
+                            log.error("Kafka send failed", ex);
+
+                            recipeRepository.updateStatus(
+                                    lockedRecipeId,
+                                    SendStatus.PENDING
+                            );
                         }
+                    });
 
-                );
+        } catch (Exception e) {
+
+            log.error("Serialization failed", e);
+
+            recipeRepository.updateStatus(
+                    lockedRecipeId,
+                    SendStatus.PENDING
+            );
+        }
     }
 
 

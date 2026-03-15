@@ -15,8 +15,3 @@ class RecipeRequest(BaseModel):
     ingredients: List[Ingredient] = Field(..., description="List of ingredients")
     time_to_cook_minutes: int = Field(..., description="Cooking time in minutes")
     creator: str = Field(..., description="Author name")
-
-
-
-
-
