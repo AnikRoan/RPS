@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers(HttpMethod.GET,"/recipes/{recipeId}/votes").permitAll()
                         .requestMatchers(HttpMethod.GET,"/recipe/{recipeId}").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/recipe/search").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,

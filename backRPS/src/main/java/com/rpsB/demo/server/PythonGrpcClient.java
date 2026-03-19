@@ -3,14 +3,17 @@ package com.rpsB.demo.server;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import recipe.RecipeSearch;
 import recipe.RecipeSearchServiceGrpc;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class PythonGrpcClient {
     private final ManagedChannel channel;
     private final RecipeSearchServiceGrpc.RecipeSearchServiceBlockingStub stub;
@@ -21,16 +24,22 @@ public class PythonGrpcClient {
                 .usePlaintext()
                 .build();
 
-        this.stub = RecipeSearchServiceGrpc.newBlockingStub(channel);
+        this.stub = RecipeSearchServiceGrpc
+                .newBlockingStub(channel)
+                .withDeadlineAfter(40, TimeUnit.SECONDS);
     }
 
 
     public List<UUID> getRecipeIds(String text) {
+        log.info(text);
+        log.info("start search");
         RecipeSearch.SearchRequest request = RecipeSearch.SearchRequest.newBuilder()
                 .setQuery(text)
                 .build();
-
+        log.info("REQUEST: {} ",request.getQuery());
         RecipeSearch.SearchResponse reply = stub.searchRecipes(request);
+        log.info("Response received. Recipes found: {}", reply.getRecipeIdsCount());
+
         return reply.getRecipeIdsList()
                 .stream()
                 .map(UUID::fromString)

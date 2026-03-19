@@ -4,3 +4,4 @@ grpcio
 grpcio-tools
 confluent-kafka
 python-dotenv
+torch

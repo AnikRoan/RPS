@@ -1,3 +1,7 @@
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "generated"))
 from concurrent import futures
 import grpc
 import threading
@@ -11,6 +15,8 @@ from app.recipe_processor import process_recipe_batch
 
 from generated import recipe_search_pb2_grpc
 
+import torch
+torch.set_num_threads(1)
 
 def main():
 
@@ -21,13 +27,13 @@ def main():
 
     service = RecipeSearchService(embedder, repo)
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
 
     recipe_search_pb2_grpc.add_RecipeSearchServiceServicer_to_server(
         service, server
     )
 
-    server.add_insecure_port(f"[::]:{s.grpc_port}")
+    server.add_insecure_port("0.0.0.0:50051")
 
     server.start()
 
