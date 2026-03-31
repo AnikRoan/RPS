@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
+public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     @Query("""
             SELECT r FROM Recipe r 
@@ -38,7 +38,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             FROM Recipe r 
             WHERE r.uuid IN :uuids
             """)
-    List<RecipeShort> findByLockedUuids(@Param("uuids")List<UUID> uuids);
+    List<RecipeShort> findByLockedUuids(@Param("uuids")List<Long> uuids);
 
     @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
@@ -47,7 +47,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             SET status = :sendStatus
             WHERE uuid IN :uuids                        
             """)
-    void updateStatus(@Param("uuids") List<UUID> uuids,
+    void updateStatus(@Param("uuids") List<Long> uuids,
                       @Param("sendStatus") SendStatus sendStatus);
 
     @Query(value = """
@@ -59,7 +59,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             FOR UPDATE SKIP LOCKED
             LIMIT 100
             """, nativeQuery = true)
-    List<UUID> lockPendingIds();
+    List<Long> lockPendingIds();
 
     @Modifying
     @Query(value = """
@@ -76,5 +76,5 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
             FROM Recipe r 
             WHERE r.uuid IN :recipeIds             
             """)
-    Optional<List<Recipe>> findByRecipeIds(List<UUID> recipeIds);
+    Optional<List<Recipe>> findByRecipeIds(List<Long> recipeIds);
 }

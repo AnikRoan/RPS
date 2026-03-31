@@ -5,10 +5,9 @@ import com.rpsB.demo.enums.Category;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public record RecipeForQuadrant(
-        UUID uuid,
+        Long uuid,
         String name,
         String description,
         List<IngredientFloatDto> ingredientFloatDtos,

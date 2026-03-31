@@ -8,7 +8,6 @@ class Embedder:
         # warmup
         self._model.encode(["warmup"], show_progress_bar=False)
 
-
     def embed(self, text: str) -> list[float]:
         with torch.no_grad():
             return self._model.encode(

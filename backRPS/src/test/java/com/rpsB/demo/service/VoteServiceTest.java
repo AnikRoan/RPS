@@ -52,13 +52,13 @@ class VoteServiceTest {
     void createVote_shouldThrowIfRequestNull() {
 
         assertThrows(AppException.class,
-                () -> voteService.createVote(null, UUID.randomUUID(), 1L));
+                () -> voteService.createVote(null, 1L, 1L));
     }
 
     @Test
     void createVote_shouldCreateVote() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         VoteRequest request = new VoteRequest(5, "great");
@@ -81,7 +81,7 @@ class VoteServiceTest {
     @Test
     void createVote_shouldThrowIfDuplicateOrRecipeNotFound() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         VoteRequest request = new VoteRequest(5, "great");
@@ -101,7 +101,7 @@ class VoteServiceTest {
     void updateVote_shouldThrowIfRequestNull() {
 
         assertThrows(IllegalArgumentException.class,
-                () -> voteService.updateVote(null, UUID.randomUUID(), 1L, 1L));
+                () -> voteService.updateVote(null, 1L, 1L, 1L));
     }
 
     @Test
@@ -113,7 +113,7 @@ class VoteServiceTest {
         assertThrows(AppException.class,
                 () -> voteService.updateVote(
                         new VoteRequest(5, "note"),
-                        UUID.randomUUID(),
+                        1L,
                         1L,
                         1L
                 ));
@@ -122,11 +122,11 @@ class VoteServiceTest {
     @Test
     void updateVote_shouldThrowIfWrongRecipe() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         Vote vote = new Vote();
         Recipe recipe = new Recipe();
-        recipe.setUuid(UUID.randomUUID());
+        recipe.setUuid(2L);
 
         vote.setRecipe(recipe);
 
@@ -145,7 +145,7 @@ class VoteServiceTest {
     @Test
     void updateVote_shouldThrowIfNotOwner() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         User user = User.builder()
                 .id(2L)
@@ -173,7 +173,7 @@ class VoteServiceTest {
     @Test
     void updateVote_shouldUpdateVote() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User user = User.builder()
@@ -206,7 +206,7 @@ class VoteServiceTest {
     @Test
     void getVotes_shouldReturnPage() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         Vote vote = new Vote();
         VoteResponse response = new VoteResponse(1L, 5, "note", "");
@@ -228,7 +228,7 @@ class VoteServiceTest {
     @Test
     void deleteVote_shouldThrowIfNotFound() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         when(voteRepository.findByIdAndRecipeId(recipeId, 1L))
                 .thenReturn(Optional.empty());
@@ -240,7 +240,7 @@ class VoteServiceTest {
     @Test
     void deleteVote_shouldThrowIfNotOwner() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         User user = User.builder()
                 .id(2L)
@@ -259,7 +259,7 @@ class VoteServiceTest {
     @Test
     void deleteVote_shouldDelete() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User user = User.builder()

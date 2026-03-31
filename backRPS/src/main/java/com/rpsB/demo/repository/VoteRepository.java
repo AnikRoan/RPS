@@ -17,12 +17,12 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
             SELECT v FROM Vote v 
             WHERE v.recipe.uuid = :recipeId            
             """)
-    Page<Vote> findVotesByRecipeId(@Param("recipeId") UUID recipeId, Pageable pageable);
+    Page<Vote> findVotesByRecipeId(@Param("recipeId") Long recipeId, Pageable pageable);
 
     @Query("""
             SELECT v FROM Vote v 
             WHERE v.recipe.uuid = :recipeId
             AND v.id=:voteId            
             """)
-    Optional<Vote> findByIdAndRecipeId(@Param("recipeId") UUID recipeId, @Param("voteId") Long voteId);
+    Optional<Vote> findByIdAndRecipeId(@Param("recipeId") Long recipeId, @Param("voteId") Long voteId);
 }

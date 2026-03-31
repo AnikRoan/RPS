@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import recipe_search_pb2 as recipe__search__pb2
+from generated import recipe_search_pb2 as recipe__search__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__

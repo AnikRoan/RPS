@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/recipes/{recipeId}/votes")
@@ -28,7 +27,7 @@ public class VoteController {
     private final CurrentUserProvider userProvider;
 
     @PostMapping()
-    public ResponseEntity<VoteResponse> createVote(@PathVariable UUID recipeId,
+    public ResponseEntity<VoteResponse> createVote(@PathVariable Long recipeId,
                                                    @RequestBody VoteRequest request) {
         return ResponseEntity.ok().body(voteService.createVote(
                 request,
@@ -37,7 +36,7 @@ public class VoteController {
     }
 
     @PutMapping("/{voteId}")
-    public ResponseEntity<VoteResponse> updateVote(@PathVariable UUID recipeId,
+    public ResponseEntity<VoteResponse> updateVote(@PathVariable Long recipeId,
                                                    @PathVariable Long voteId,
                                                    @RequestBody VoteRequest request) {
         return ResponseEntity.ok().body(voteService.updateVote(
@@ -48,14 +47,14 @@ public class VoteController {
     }
 
     @GetMapping()
-    public ResponseEntity<Page<VoteResponse>> getVotes(@PathVariable UUID recipeId,
+    public ResponseEntity<Page<VoteResponse>> getVotes(@PathVariable Long recipeId,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok().body(voteService.getVotes(recipeId, page, size));
     }
 
     @DeleteMapping("/{voteId}")
-    public ResponseEntity<String> deliteVote(@PathVariable UUID recipeId,
+    public ResponseEntity<String> deliteVote(@PathVariable Long recipeId,
                                              @PathVariable Long voteId) {
         return ResponseEntity.ok().body(voteService.deleteVote(
                 recipeId,

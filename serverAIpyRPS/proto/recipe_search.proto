@@ -12,5 +12,5 @@ message SearchRequest {
 }
 
 message SearchResponse {
-  repeated string recipe_ids = 1;
+  repeated int64 recipe_ids = 1;
 }

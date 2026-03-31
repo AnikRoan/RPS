@@ -1,5 +1,5 @@
-from app.create_consumer import create_consumer
 import json
+from app.create_consumer import create_consumer
 
 
 def start_consumer(process_function):
@@ -9,7 +9,6 @@ def start_consumer(process_function):
         while True:
             msg = consumer.poll(1.0)
             if msg is None:
-
                 continue
 
             if msg.error():
@@ -20,7 +19,7 @@ def start_consumer(process_function):
                 data = json.loads(msg.value().decode("utf-8"))
                 process_function(data)
                 consumer.commit(msg)
-                print("DATA: ",data)
+                print("DATA: ", data)
             except Exception as e:
                 print("Processing error: ", e)
     finally:

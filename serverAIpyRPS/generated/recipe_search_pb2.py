@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13recipe_search.proto\x12\x06recipe\"-\n\rSearchRequest\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05limit\x18\x02 \x01(\x05\"$\n\x0eSearchResponse\x12\x12\n\nrecipe_ids\x18\x01 \x03(\t2U\n\x13RecipeSearchService\x12>\n\rSearchRecipes\x12\x15.recipe.SearchRequest\x1a\x16.recipe.SearchResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13recipe_search.proto\x12\x06recipe\"-\n\rSearchRequest\x12\r\n\x05query\x18\x01 \x01(\t\x12\r\n\x05limit\x18\x02 \x01(\x05\"$\n\x0eSearchResponse\x12\x12\n\nrecipe_ids\x18\x01 \x03(\x03\x32U\n\x13RecipeSearchService\x12>\n\rSearchRecipes\x12\x15.recipe.SearchRequest\x1a\x16.recipe.SearchResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)

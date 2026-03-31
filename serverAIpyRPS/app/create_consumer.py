@@ -3,8 +3,8 @@ from app.config import Settings
 
 settings = Settings()
 
-def create_consumer():
 
+def create_consumer():
     config = {
         "bootstrap.servers": settings.kafka_bootstrap_servers,
         "group.id": settings.kafka_group_id,

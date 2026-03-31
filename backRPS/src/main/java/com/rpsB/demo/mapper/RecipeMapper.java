@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
-import java.util.UUID;
 
 @Mapper(
         componentModel = "spring",
@@ -17,15 +16,19 @@ public interface RecipeMapper {
 
     //Entity -> Response dto
     @Mapping(source = "ingredientList", target = "ingredientResponseList")
-    @Mapping( source = "creator.id", target = "userId")
+    @Mapping(source = "creator.id", target = "userId")
     RecipeResponse toDto(Recipe recipe);
+
+    @Mapping(source = "recipe.ingredientList", target = "ingredientResponseList")
+    @Mapping(source = "userId", target = "userId")
+    RecipeResponse toDtoWithId(Recipe recipe, Long userId);
 
     //Request dto -> Entity
     @Mapping(target = "uuid", ignore = true)
-    @Mapping(target = "averageVote",ignore = true)
+    @Mapping(target = "averageVote", ignore = true)
     @Mapping(target = "creator", ignore = true)
-    @Mapping(target = "created_at",ignore = true)
-    @Mapping(target = "updated_at",ignore = true)
+    @Mapping(target = "created_at", ignore = true)
+    @Mapping(target = "updated_at", ignore = true)
     @Mapping(source = "ingredientDtoList", target = "ingredientList")
     Recipe toEntity(RecipeRequest request);
 

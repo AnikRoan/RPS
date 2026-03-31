@@ -22,7 +22,7 @@ class RecipeSearchService(recipe_search_pb2_grpc.RecipeSearchServiceServicer):
             print("STEP 3 search finished")
 
             return recipe_search_pb2.SearchResponse(
-                recipe_ids=[str(i) for i in ids]
+                recipe_ids=[int(i) for i in ids]
             )
 
         except Exception as e:

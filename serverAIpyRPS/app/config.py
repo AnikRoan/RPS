@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Settings:
-
     # Qdrant
     qdrant_path: str = "http://localhost:6333"
     collection: str = "recipes"
