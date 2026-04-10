@@ -32,7 +32,7 @@ public class VoteService {
 
 
     @Transactional
-    public VoteResponse createVote(VoteRequest request, UUID recipeId, Long userId) {
+    public VoteResponse createVote(VoteRequest request, Long recipeId, Long userId) {
         if (request == null) {
             throw new AppException(HttpStatus.CONFLICT, "Vote request cannot be null");
         }
@@ -53,7 +53,7 @@ public class VoteService {
     }
 
     @Transactional
-    public VoteResponse updateVote(VoteRequest request, UUID recipeId, Long vote_id, Long userId) {
+    public VoteResponse updateVote(VoteRequest request, Long recipeId, Long vote_id, Long userId) {
         if (request == null) {
             throw new IllegalArgumentException("Vote request cannot be null");
         }
@@ -73,7 +73,7 @@ public class VoteService {
         return voteMapper.toDto(vote);
     }
 
-    public Page<VoteResponse> getVotes(UUID recipeId, int page, int size) {
+    public Page<VoteResponse> getVotes(Long recipeId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return voteRepository.findVotesByRecipeId(recipeId, pageable)
                 .map(voteMapper::toDto);
@@ -81,7 +81,7 @@ public class VoteService {
     }
 
     @Transactional
-    public String deleteVote(UUID recipeId, Long voteId, Long userId) {
+    public String deleteVote(Long recipeId, Long voteId, Long userId) {
         Vote vote = voteRepository
                 .findByIdAndRecipeId(recipeId, voteId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Vote not found"));

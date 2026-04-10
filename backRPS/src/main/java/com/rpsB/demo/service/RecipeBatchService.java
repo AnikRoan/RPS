@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +16,9 @@ public class RecipeBatchService {
     private final RecipeRepository recipeRepository;
 
     @Transactional
-    public List<UUID> acquireBatch() {
+    public List<Long> acquireBatch() {
 
-        List<UUID> ids = recipeRepository.lockPendingIds();
+        List<Long> ids = recipeRepository.lockPendingIds();
 
         if (!ids.isEmpty()) {
             recipeRepository.updateStatus(ids, SendStatus.SENDING);

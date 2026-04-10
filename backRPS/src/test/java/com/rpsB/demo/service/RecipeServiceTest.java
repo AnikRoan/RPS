@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,12 +86,12 @@ class RecipeServiceTest {
                 .id(userId)
                 .build();
         RecipeResponse response = new RecipeResponse(
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                1L,
                 "Recipe",
                 "test recipe",
                 List.of(new IngredientResponse(
                         1L,
-                        UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                        1L,
                         "recipe",
                         4.0,
                         "",
@@ -112,18 +111,17 @@ class RecipeServiceTest {
         );
 
         when(recipeMapper.toEntity(request)).thenReturn(recipe);
-        when(entityManager.getReference(User.class, userId)).thenReturn(user);
         when(recipeRepository.save(recipe)).thenReturn(recipe);
-        when(recipeMapper.toDto(recipe)).thenReturn(response);
+        when(recipeMapper.toDtoWithId(recipe,1L)).thenReturn(response);
 
         // WHEN
         RecipeResponse result = recipeService.createRecipe(request, userId);
 
         // THEN
-        assertEquals(user, recipe.getCreator());
+        assertEquals(user.getId(), recipe.getCreator().getId());
         assertEquals(recipe, ingredient.getRecipe());
         verify(recipeRepository).save(recipe);
-        verify(recipeMapper).toDto(recipe);
+        verify(recipeMapper).toDtoWithId(recipe,1L);
 
         assertEquals(response, result);
     }
@@ -132,7 +130,7 @@ class RecipeServiceTest {
     @Test
     void updateRecipe_shouldUpdateFields() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User creator = User.builder()
@@ -150,12 +148,12 @@ class RecipeServiceTest {
         );
 
         RecipeResponse response = new RecipeResponse(
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                1L,
                 "Recipe",
                 "test recipe",
                 List.of(new IngredientResponse(
                         1L,
-                        UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                        1L,
                         "recipe",
                         4.0,
                         "",
@@ -177,7 +175,7 @@ class RecipeServiceTest {
         when(recipeRepository.findById(recipeId))
                 .thenReturn(Optional.of(recipe));
 
-        when(recipeMapper.toDto(recipe))
+        when(recipeMapper.toDtoWithId(recipe,1L))
                 .thenReturn(response);
 
         // WHEN
@@ -190,14 +188,14 @@ class RecipeServiceTest {
         assertEquals(50, recipe.getTimeToCookMinutes());
         assertEquals(Category.DINNER, recipe.getCategory());
 
-        verify(recipeMapper).toDto(recipe);
+        verify(recipeMapper).toDtoWithId(recipe,1L);
         assertEquals(response, result);
     }
 
     @Test
     void updateRecipe_shouldThrowIfNotFound() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         when(recipeRepository.findById(recipeId))
@@ -214,7 +212,7 @@ class RecipeServiceTest {
     @Test
     void updateRecipe_shouldThrowIfNotOwner() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User creator = User.builder()
@@ -238,16 +236,16 @@ class RecipeServiceTest {
     @Test
     void getRecipeById_shouldReturnRecipe() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         Recipe recipe = new Recipe();
         RecipeResponse response = new RecipeResponse(
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                1L,
                 "Recipe",
                 "test recipe",
                 List.of(new IngredientResponse(
                         1L,
-                        UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                        1L,
                         "recipe",
                         4.0,
                         "",
@@ -285,7 +283,7 @@ class RecipeServiceTest {
     @Test
     void getRecipeById_shouldThrowIfNotFound() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
 
         when(recipeRepository.findById(recipeId))
                 .thenReturn(Optional.empty());
@@ -303,12 +301,12 @@ class RecipeServiceTest {
 
         Recipe recipe = new Recipe();
         RecipeResponse response = new RecipeResponse(
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                1L,
                 "Recipe",
                 "test recipe",
                 List.of(new IngredientResponse(
                         1L,
-                        UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                        1L,
                         "recipe",
                         4.0,
                         "",
@@ -367,7 +365,7 @@ class RecipeServiceTest {
     @Test
     void deleteRecipeById_shouldDeleteIfOwner() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User creator = User.builder()
@@ -390,7 +388,7 @@ class RecipeServiceTest {
     @Test
     void deleteRecipeById_shouldNotDeleteIfNotOwner() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User creator = User.builder()
@@ -413,7 +411,7 @@ class RecipeServiceTest {
     @Test
     void updateIngredient_shouldThrowIfNotOwner() {
 
-        UUID recipeId = UUID.randomUUID();
+       // UUID recipeId = UUID.randomUUID();
 
         User creator = User.builder()
                 .id(2L)
@@ -422,12 +420,12 @@ class RecipeServiceTest {
         Recipe recipe = new Recipe();
         recipe.setCreator(creator);
 
-        when(recipeRepository.findById(recipeId))
+        when(recipeRepository.findById(1L))
                 .thenReturn(Optional.of(recipe));
 
         assertThrows(AppException.class,
                 () -> recipeService.updateIngredient(
-                        recipeId,
+                        1L,
                         1L,
                         new IngredientRequest("", 1.1, "", "", 0.0,
                                 0.0, 0.0, 0.0),
@@ -438,7 +436,7 @@ class RecipeServiceTest {
     @Test
     void updateIngredient_shouldThrowIfIngredientNotFound() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User creator = User.builder()
@@ -465,7 +463,7 @@ class RecipeServiceTest {
     @Test
     void updateIngredient_shouldUpdateFields() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
         Long ingredientId = 10L;
 
@@ -493,7 +491,7 @@ class RecipeServiceTest {
 
         IngredientResponse response = new IngredientResponse(
                 1L,
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                1L,
                 "Sugar",
                 100.0,
                 "g",
@@ -536,7 +534,7 @@ class RecipeServiceTest {
     @Test
     void deleteIngredient_shouldRemoveIngredient() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
         Long ingredientId = 10L;
 
@@ -567,7 +565,7 @@ class RecipeServiceTest {
     @Test
     void addIngredient_shouldAddIngredient() {
 
-        UUID recipeId = UUID.randomUUID();
+        Long recipeId = 1L;
         Long userId = 1L;
 
         User creator = User.builder()
@@ -593,7 +591,7 @@ class RecipeServiceTest {
 
         IngredientResponse response = new IngredientResponse(
                 1L,
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                1L,
                 "Sugar",
                 100.0,
                 "g",

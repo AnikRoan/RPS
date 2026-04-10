@@ -1,5 +1,5 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams
 from qdrant_client import models
 
 
@@ -30,6 +30,7 @@ class QdrantRepo:
         )
 
     def search(self, vector: list[float], limit: int = 50):
+        print("start search")
         result = self.client.query_points(
             collection_name=self.collection,
             query=vector,

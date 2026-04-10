@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -36,7 +35,7 @@ public class RecipeEventProducer {
 
     public void send() {
 
-        List<UUID> lockedRecipeId = recipeBatchService.acquireBatch();
+        List<Long> lockedRecipeId = recipeBatchService.acquireBatch();
 
         if (lockedRecipeId.isEmpty()) {
             return;
@@ -48,7 +47,7 @@ public class RecipeEventProducer {
         List<IngredientFloatDto> ingredientFloatDtos =
                 ingredientRepository.findByRecipeId(lockedRecipeId);
 
-        Map<UUID, List<IngredientFloatDto>> grouped =
+        Map<Long, List<IngredientFloatDto>> grouped =
                 ingredientFloatDtos.stream()
                         .collect(Collectors.groupingBy(
                                 IngredientFloatDto::recipeId));

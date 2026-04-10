@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,7 +25,12 @@ import lombok.Setter;
 @Builder
 public class Ingredient {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ingredient_seq")
+    @SequenceGenerator(
+            name = "ingredient_seq",
+            sequenceName = "ingredient_seq",
+            allocationSize = 50
+    )
     private Long id;
     @ManyToOne(
             fetch = FetchType.LAZY,

@@ -8,6 +8,8 @@ import com.rpsB.demo.mapper.UserMapper;
 import com.rpsB.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,11 +34,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Cacheable(value = "users", key = "#userId")
     public UserDto getMe(Long userId) {
         return userMapper.toDto(userRepository.findById(userId).orElseThrow(() ->
                 new AppException(HttpStatus.NOT_FOUND, "User not found")));
     }
 
+    @CacheEvict(value = "users", key = "#userId")
     @Transactional
     public UserDto updateMe(UserUpdateDto updateDto, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -55,6 +59,7 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
     @Transactional
     public String deleteMe(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->

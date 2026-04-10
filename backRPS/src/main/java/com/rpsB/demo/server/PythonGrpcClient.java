@@ -9,7 +9,6 @@ import recipe.RecipeSearch;
 import recipe.RecipeSearchServiceGrpc;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -30,7 +29,7 @@ public class PythonGrpcClient {
     }
 
 
-    public List<UUID> getRecipeIds(String text) {
+    public List<Long> getRecipeIds(String text) {
         log.info(text);
         log.info("start search");
         RecipeSearch.SearchRequest request = RecipeSearch.SearchRequest.newBuilder()
@@ -40,10 +39,7 @@ public class PythonGrpcClient {
         RecipeSearch.SearchResponse reply = stub.searchRecipes(request);
         log.info("Response received. Recipes found: {}", reply.getRecipeIdsCount());
 
-        return reply.getRecipeIdsList()
-                .stream()
-                .map(UUID::fromString)
-                .toList();
+        return reply.getRecipeIdsList();
     }
 
     @PreDestroy

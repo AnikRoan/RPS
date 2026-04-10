@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record IngredientResponse(
         Long id,
-        UUID recipeId,
+        Long recipeId,
         String name,
         Double amount,
         String unit,

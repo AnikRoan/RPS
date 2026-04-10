@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
@@ -23,5 +22,5 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
                     WHERE i.recipe.uuid IN :recipeIds                                         
                     """
     )
-    List<IngredientFloatDto> findByRecipeId(List<UUID> recipeIds);
+    List<IngredientFloatDto> findByRecipeId(List<Long> recipeIds);
 }

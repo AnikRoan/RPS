@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record RecipeShort(
-        UUID uuid,
+        Long uuid,
         String name,
         String description,
         int timeToCookMinutes,

@@ -17,6 +17,8 @@ import com.rpsB.demo.server.PythonGrpcClient;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,23 +38,26 @@ public class RecipeService {
     private final RecipeMapper recipeMapper;
     private final IngredientMapper ingredientMapper;
     private final RecipeRepository recipeRepository;
-    private final EntityManager entityManager;
     private final PythonGrpcClient client;
+    private final EntityManager entityManager;
 
     @Transactional
     public RecipeResponse createRecipe(RecipeRequest recipeRequest, Long userId) {
         Recipe recipe = recipeMapper.toEntity(recipeRequest);
-        recipe.setCreator(entityManager.getReference(User.class, userId));
+        recipe.setCreator(User.builder().id(userId).build());
 
         recipe.getIngredientList()
                 .forEach(i -> i.setRecipe(recipe));
 
-        return recipeMapper.toDto(recipeRepository.save(recipe));
+        RecipeResponse response = recipeMapper.toDtoWithId(recipeRepository.save(recipe), userId);
+        entityManager.flush();
 
+        return response;
     }
 
+    @CacheEvict(value = "recipe_id", key = "#recipeId")
     @Transactional
-    public RecipeResponse updateRecipe(RecipeUpdateDto updateRecipe, UUID recipeId, Long userId) {
+    public RecipeResponse updateRecipe(RecipeUpdateDto updateRecipe, Long recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found"));
 
@@ -69,10 +73,11 @@ public class RecipeService {
             recipe.setStatus(SendStatus.PENDING);
         }
 
-        return recipeMapper.toDto(recipe);
+        return recipeMapper.toDtoWithId(recipe, userId);
     }
 
-    public RecipeResponse getRecipeById(UUID recipeId) {
+    @Cacheable(value = "recipe_id", key = "#recipeId", unless = "#result == null")
+    public RecipeResponse getRecipeById(Long recipeId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found")
         );
@@ -87,8 +92,9 @@ public class RecipeService {
                 .map(recipeMapper::toDto);
     }
 
+    @CacheEvict(value = "recipe_id", key = "#recipeId", beforeInvocation = true)
     @Transactional
-    public void deleteRecipeById(UUID recipeId, Long userId) {
+    public void deleteRecipeById(Long recipeId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "Recipe not found")
         );
@@ -98,8 +104,9 @@ public class RecipeService {
     }
 
     //    Actions with ingredient
+    @CacheEvict(value = "recipe_id", key = "#recipeId")
     @Transactional
-    public IngredientResponse updateIngredient(UUID recipeId, Long ingredientId, IngredientRequest ingredientRequest, Long userId) {
+    public IngredientResponse updateIngredient(Long recipeId, Long ingredientId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
                 new AppException(HttpStatus.NOT_FOUND, "Recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
@@ -127,7 +134,8 @@ public class RecipeService {
         return ingredientMapper.toDto(ingredient);
     }
 
-    public void deleteIngredient(UUID recipeId, Long ingredientId, Long userId) {
+    @CacheEvict(value = "recipe_id", key = "#recipeId")
+    public void deleteIngredient(Long recipeId, Long ingredientId, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
                 new AppException(HttpStatus.NOT_FOUND, "recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
@@ -143,8 +151,9 @@ public class RecipeService {
         recipe.getIngredientList().remove(ingredient);
     }
 
+    @CacheEvict(value = "recipe_id", key = "#recipeId")
     @Transactional
-    public IngredientResponse addIngredient(UUID recipeId, IngredientRequest ingredientRequest, Long userId) {
+    public IngredientResponse addIngredient(Long recipeId, IngredientRequest ingredientRequest, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() ->
                 new AppException(HttpStatus.NOT_FOUND, "recipe not found"));
         if (!Objects.equals(userId, recipe.getCreator().getId())) {
@@ -157,7 +166,7 @@ public class RecipeService {
     }
 
     public List<RecipeResponse> searchRecipe(String text) {
-        List<UUID> recipeIds = client.getRecipeIds(text);
+        List<Long> recipeIds = client.getRecipeIds(text);
 
         if (recipeIds.isEmpty()) {
             throw new AppException(HttpStatus.NOT_FOUND, "recipes not found");
@@ -166,7 +175,7 @@ public class RecipeService {
         List<Recipe> recipes = recipeRepository.findByRecipeIds(recipeIds).orElseThrow(() ->
                 new AppException(HttpStatus.NOT_FOUND, "recipe not found"));
 
-        Map<UUID, Recipe> recipeMap = recipes.stream()
+        Map<Long, Recipe> recipeMap = recipes.stream()
                 .collect(Collectors.toMap(Recipe::getUuid, r -> r));
 
         List<Recipe> orderedRecipes = recipeIds.stream()

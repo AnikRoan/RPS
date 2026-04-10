@@ -1,25 +1,23 @@
 import sys
 import os
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "generated"))
-from concurrent import futures
+import torch
 import grpc
 import threading
 
+from concurrent import futures
 from app.config import Settings
 from app.embeddings import Embedder
 from app.qdrant_repo import QdrantRepo
 from app.recipe_search_service import RecipeSearchService
 from app.kafka_consumer import start_consumer
 from app.recipe_processor import process_recipe_batch
-
 from generated import recipe_search_pb2_grpc
 
-import torch
+sys.path.append(os.path.join(os.path.dirname(__file__), "generated"))
 torch.set_num_threads(1)
 
-def main():
 
+def main():
     s = Settings()
 
     embedder = Embedder(s.model_name)
