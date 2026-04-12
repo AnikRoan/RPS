@@ -5,7 +5,6 @@ import com.rpsB.demo.dto.RecipeResponse;
 import com.rpsB.demo.entity.Recipe;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
 import java.util.List;
 
 @Mapper(

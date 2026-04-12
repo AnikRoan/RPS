@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +47,7 @@ public class VoteService {
             return voteMapper.toDto(voteRepository.save(vote));
         } catch (DataIntegrityViolationException ex) {
             throw new AppException(HttpStatus.FORBIDDEN, "Recipe not found," +
-                                                         " or you can not write more votes to this recipe");
+                    " or you can not write more votes to this recipe");
         }
     }
 
@@ -77,7 +76,6 @@ public class VoteService {
         Pageable pageable = PageRequest.of(page, size);
         return voteRepository.findVotesByRecipeId(recipeId, pageable)
                 .map(voteMapper::toDto);
-
     }
 
     @Transactional
